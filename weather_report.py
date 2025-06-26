@@ -4,6 +4,7 @@ import plotly.express as px
 from preswald import connect, get_df
 from preswald import query
 from preswald import table, text
+from preswald import slider
     
 connect()  # Initialize connection to preswald.toml data sources
 df = get_df("weather_data")  # Load data
@@ -48,9 +49,17 @@ table(filtered_df, title="Filtered Data")
 text("## Interactive Humidity Threshold Filter")
 text("Use the slider to dynamically explore regions with humidity levels exceeding the selected threshold. This helps identify areas with consistently high moisture, which can influence weather-related planning, health advisories, or equipment performance.") 
 
-threshold = 70
-static_filtered = df[df["Humidity_pct"] > threshold]
-table(static_filtered.copy().assign(Date_Time=static_filtered["Date_Time"].astype(str)), title=f"Data Where Humidity > {threshold}%")
+# Create a slider for humidity threshold with default set to 70
+threshold = slider("Humidity Threshold (%)", min_val=0, max_val=100, default=70)
+
+# Filter the dataframe based on the slider threshold
+filtered_df = df[df["Humidity_pct"] > threshold]
+
+# Display the filtered results
+table(
+    filtered_df.copy().assign(Date_Time=filtered_df["Date_Time"].astype(str)),
+    title=f"Data Where Humidity > {threshold}%"
+)
 
 text("## Temperature vs. Humidity by Location")
 text("This scatter plot reveals the relationship between temperature and humidity across various locations. Larger point sizes indicate stronger wind speeds, helping uncover how wind dynamics may influence or correlate with localized climate conditions.")
